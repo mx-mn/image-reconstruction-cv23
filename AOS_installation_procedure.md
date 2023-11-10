@@ -1,33 +1,33 @@
 AOS Installation Procedure
 ---------------------------
 
-** Install visual studio community for windows : https://visualstudio.microsoft.com/vs/community/
+* Install visual studio community for windows : https://visualstudio.microsoft.com/vs/community/
 Then, install desktop development with c++
 
-** Install visual studio code for windows : https://code.visualstudio.com
+* Install visual studio code for windows : https://code.visualstudio.com
 
-** Install python 3.7.9:  https://www.python.org/downloads/release/python-379/      (scroll down to the bottom to find the link : Windows x86-64 executable installer)
+* Install python 3.7.9:  https://www.python.org/downloads/release/python-379/      (scroll down to the bottom to find the link : Windows x86-64 executable installer)
 
-** Download or clone the LFR folder from the github page:  https://github.com/JKU-ICG/AOS/tree/stable_release/AOS%20for%20Drone%20Swarms/LFR
+* Download or clone the LFR folder from the github page:  https://github.com/JKU-ICG/AOS/tree/stable_release/AOS%20for%20Drone%20Swarms/LFR
 
-** Install extensions from within VS code. Bring up the Extensions view by clicking on the Extensions icon in the Activity Bar on the side of VS Code or the View: Extensions command (Ctrl+Shift+X). For more details :      
+* Install extensions from within VS code. Bring up the Extensions view by clicking on the Extensions icon in the Activity Bar on the side of VS Code or the View: Extensions command (Ctrl+Shift+X). For more details :      
    https://code.visualstudio.com/docs/editor/extension-marketplace
 
 	- Install python and Jupyter extensions.
 
-**  Open the Computervision_project.ipynb script ("Make sure that this script is inside the LFR/python folder") in the VS code. Select and set kernel on the top right to python 3.7.9. Open a new terminal (Terminal > New Terminal). 
+*  Open the Computervision_project.ipynb script ("Make sure that this script is inside the LFR/python folder") in the VS code. Select and set kernel on the top right to python 3.7.9. Open a new terminal (Terminal > New Terminal). 
 
-**  Set the working directory to LFR/python. Now run the command pip install -r requirements.txt in the terminal. This will take a few minutes.
+*  Set the working directory to LFR/python. Now run the command pip install -r requirements.txt in the terminal. This will take a few minutes.
 
-**   Run the command setup_Win.py build_ext --inplace with python as your working directory and make sure that your path is pointing to your python 3.7.9 installation. Open the terminal then write: python setup_Win.py build_ext --inplace
+*   Run the command setup_Win.py build_ext --inplace with python as your working directory and make sure that your path is pointing to your python 3.7.9 installation. Open the terminal then write: python setup_Win.py build_ext --inplace
 
 	- It should loo like this: PS D:\LFR\python> & C:/Users/Rakesh/AppData/Local/Programs/Python/Python37/python.exe setup_Win.py build_ext --inplace
 
 
-** You can now run the AOS integrator script. Please make changes to the script to change path of the images directory and so on. Follow the comments in the script.
+* You can now run the AOS integrator script. Please make changes to the script to change path of the images directory and so on. Follow the comments in the script.
 
 
-** Changing the focal plane in the AOS integrator script: change the value of the variable Focal_plane. By default it is 0 (on the ground). If you want it at, for example, 3m above the ground, you need to use Focal_plane=-3 --> note that distance above the ground need negative values. A good focus range that covers all the target persons is 0..-3 (i.e., from 0 to 3m above ground). But not that a lying person, sitting person, and standing person vary in height.
+* Changing the focal plane in the AOS integrator script: change the value of the variable Focal_plane. By default it is 0 (on the ground). If you want it at, for example, 3m above the ground, you need to use Focal_plane=-3 --> note that distance above the ground need negative values. A good focus range that covers all the target persons is 0..-3 (i.e., from 0 to 3m above ground). But not that a lying person, sitting person, and standing person vary in height.
 
 
 

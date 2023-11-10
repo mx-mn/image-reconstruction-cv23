@@ -1,6 +1,15 @@
- # image-reconstruction-cv23
-This is the repository for our group 
-https://drive.google.com/drive/folders/1UC6sGGWkRpJjqyYOnqByaa_mxeucFmqJ
+# image-reconstruction-cv23
+Timetable of delivery tasks is:
+- [ ] 20.11.2023, 16:00 Slides literature review 
+- [ ] 11.12.2023, 16:00 Slides idea 
+- [ ] 08.01.2024, 16:00 Slides intermediate results  
+- [ ] 22.01.2024, 16:00 Final results (slides, code) 
+	 
+
+[project introduction slides](https://moodle.jku.at/jku/pluginfile.php/9527377/mod_resource/content/7/Project_Introduction_%28Abbass%29.pdf)
+
+[drive](https://drive.google.com/drive/folders/1UC6sGGWkRpJjqyYOnqByaa_mxeucFmqJ)
+
 
 # TODOs
 - [ ] brainstorm for pipelines
@@ -26,7 +35,7 @@ Take a stack of integral images with different focal stack. Use CNN or VIT. The 
 Just some notes.
 The focal point can be arbitrarily selected ? 
 Where could a person be?
-It could be form 0-200cm 
+It could be form 0-300cm 
 Most likely in a continous block (if it is not a ghost) e.g.: from 0-170cm or from 0-40cm if the person is laying down or 0-110cm if the person is sitting
 
 How can we match the focal length to these values? 

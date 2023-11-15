@@ -34,8 +34,10 @@ So we only use a single integral image, with a focal length that is good. Or we 
 Further References: 
 
 Code Example:
+
 https://github.com/chintan1995/Image-Denoising-using-Deep-Learning/blob/main/Models/(Baseline)_REDNet_256x256.ipynb
 ![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/95431396/7af6449b-e540-496a-929e-71c8a442149b)
+Denoising AEs:
 https://omdena.com/blog/denoising-autoencoders/
 Convolutional autoencoders for image noise reduction:
 https://towardsdatascience.com/convolutional-autoencoders-for-image-noise-reduction-32fce9fc1763

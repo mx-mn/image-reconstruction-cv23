@@ -32,6 +32,7 @@ So we only use a single integral image, with a focal length that is good. Or we 
 (-) coarse, loss of information throug using only one focal length, or through averaging/argmaxing  
 
 Further References: 
+
 Code Example:
 https://github.com/chintan1995/Image-Denoising-using-Deep-Learning/blob/main/Models/(Baseline)_REDNet_256x256.ipynb
 ![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/95431396/7af6449b-e540-496a-929e-71c8a442149b)

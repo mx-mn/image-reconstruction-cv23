@@ -20,7 +20,9 @@ Timetable of delivery tasks is:
 # Pipeline Ideas:
 
 ## General Stuff:
-List of different methods for machine learning denoising: https://towardsai.net/p/deep-learning/image-de-noising-using-deep-learning
+List of different methods for machine learning denoising with code (convolutional AE, Multi-level wavelet CNN): 
+https://towardsai.net/p/deep-learning/image-de-noising-using-deep-learning
+
 
 ## Denoising Autoencoder
 take 'noisy'/ occluded image with trees, use AE or VAE to denoise the image https://towardsdatascience.com/denoising-autoencoders-explained-dbb82467fc2
@@ -30,9 +32,12 @@ So we only use a single integral image, with a focal length that is good. Or we 
 (-) coarse, loss of information throug using only one focal length, or through averaging/argmaxing  
 
 Further References: 
+
 https://omdena.com/blog/denoising-autoencoders/
-Convolutional autoencoders for image noise reduction ![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/95431396/10885e18-36d9-41b0-a1fc-e8faf87aa109)
+Convolutional autoencoders for image noise reduction:
 https://towardsdatascience.com/convolutional-autoencoders-for-image-noise-reduction-32fce9fc1763
+![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/95431396/10885e18-36d9-41b0-a1fc-e8faf87aa109)
+
 
 
 ## DEEEEEEP Learning

@@ -15,7 +15,13 @@ Timetable of delivery tasks is:
 - [ ] brainstorm for pipelines
 - [ ] find good focal length.
 
+
+
 # Pipeline Ideas:
+
+## General Stuff:
+List of different methods for machine learning denoising: https://towardsai.net/p/deep-learning/image-de-noising-using-deep-learning
+
 ## Denoising Autoencoder
 take 'noisy'/ occluded image with trees, use AE or VAE to denoise the image https://towardsdatascience.com/denoising-autoencoders-explained-dbb82467fc2
 So we only use a single integral image, with a focal length that is good. Or we take a focal stack, and use the max pixel of each image. The result should be okayish.
@@ -25,6 +31,8 @@ So we only use a single integral image, with a focal length that is good. Or we 
 
 Further References: 
 https://omdena.com/blog/denoising-autoencoders/
+Convolutional autoencoders for image noise reduction ![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/95431396/10885e18-36d9-41b0-a1fc-e8faf87aa109)
+https://towardsdatascience.com/convolutional-autoencoders-for-image-noise-reduction-32fce9fc1763
 
 
 ## DEEEEEEP Learning

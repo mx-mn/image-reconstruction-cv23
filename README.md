@@ -57,7 +57,9 @@ Take a stack of integral images with different focal stack. Use CNN or VIT. The 
 ![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/68200625/840d89f7-0bd2-4ee7-8e5f-6a3ded49e39b)
 
 Further References:
+
 Code Example:
+
 https://github.com/chintan1995/Image-Denoising-using-Deep-Learning/blob/main/Models/MWCNN_256x256.ipynb
 ![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/95431396/22939360-4a5c-4cc5-87c7-79018aeccfb2)
 

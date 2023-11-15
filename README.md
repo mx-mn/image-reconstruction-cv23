@@ -21,7 +21,11 @@ take 'noisy'/ occluded image with trees, use AE or VAE to denoise the image http
 So we only use a single integral image, with a focal length that is good. Or we take a focal stack, and use the max pixel of each image. The result should be okayish.
 
 (+) cheap and fast to train. Good literature  
-(-) coarse, loss of information throug using only one focal length, or through averaging/argmaxing   
+(-) coarse, loss of information throug using only one focal length, or through averaging/argmaxing  
+
+Further References: 
+https://omdena.com/blog/denoising-autoencoders/
+
 
 ## DEEEEEEP Learning
 Take a stack of integral images with different focal stack. Use CNN or VIT. The different focal lengths are just like different color channels. 

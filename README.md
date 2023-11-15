@@ -32,7 +32,9 @@ So we only use a single integral image, with a focal length that is good. Or we 
 (-) coarse, loss of information throug using only one focal length, or through averaging/argmaxing  
 
 Further References: 
-
+Code Example:
+https://github.com/chintan1995/Image-Denoising-using-Deep-Learning/blob/main/Models/(Baseline)_REDNet_256x256.ipynb
+![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/95431396/7af6449b-e540-496a-929e-71c8a442149b)
 https://omdena.com/blog/denoising-autoencoders/
 Convolutional autoencoders for image noise reduction:
 https://towardsdatascience.com/convolutional-autoencoders-for-image-noise-reduction-32fce9fc1763
@@ -47,6 +49,10 @@ Take a stack of integral images with different focal stack. Use CNN or VIT. The 
 (-) bigger network, more training, more compute, more time  
 ![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/68200625/840d89f7-0bd2-4ee7-8e5f-6a3ded49e39b)
 
+Further References:
+Code Example:
+https://github.com/chintan1995/Image-Denoising-using-Deep-Learning/blob/main/Models/MWCNN_256x256.ipynb
+![image](https://github.com/mx-mn/image-reconstruction-cv23/assets/95431396/22939360-4a5c-4cc5-87c7-79018aeccfb2)
 
 # Focal Stack
 Just some notes.

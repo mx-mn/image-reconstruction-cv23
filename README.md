@@ -13,13 +13,17 @@ Timetable of delivery tasks is:
 - [ ] Raphi - Make AOS integrator work. Produce an Integral image. Ideally our complete focal stack.
 - [x] Max - Make Architecture Work.  -> see code/main.ipynb Notes are in there
 - [ ] Moritz - Update the Slides, when Max and Raphi provide material.
-- [ ] Volunteer - Check for changing shape of Residual connections. Is there a paper of some Blog about it ? (Our Encoder Convnet has 7 channels, our focal stack. And our decoder only 1, because the output is a grayscal image. Then we cannot simply reuse the classic residual connection, because it assumes same shape. I guess, we are not the first with this issue, there could be something out there)
+- [x] Max - Check for changing shape of Residual connections. Is there a paper of some Blog about it ? (Our Encoder Convnet has 7 channels, our focal stack. And our decoder only 1, because the output is a grayscal image. Then we cannot simply reuse the classic residual connection, because it assumes same shape. I guess, we are not the first with this issue, there could be something out there)
 - [ ] Volunteer - Checkout neural network training API ? Maybe we can use keras, or some other Trainer (FastAI, MosaicML Composer). Would be nice maybe because then we probably save time writing the training loop etc. Not so important though, we can just implement classic pytorch Trainign loop.
 
 ### Open Questions: 
 - is the AOS integrator complete? It looks like we need to adapt it
 - What is the AOS integrator actually doing? for what do we need the parameters (sitting, standing etc.)
+
 - How does changing shape affect the usefulness of Residual connections ? We have different shape in Encoder than in decoder. Collect ideas and read.
+    -  Answer: One can use an extra conv block to change the number of channels.
+     https://d2l.ai/chapter_convolutional-modern/resnet.html
+
 
 # Selected Paper:
 https://arxiv.org/pdf/1606.08921v3.pdf

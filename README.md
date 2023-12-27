@@ -1,7 +1,7 @@
 # image-reconstruction-cv23
 Timetable of delivery tasks is:
 - [x] 20.11.2023, 16:00 Slides literature review 
-- [ ] 11.12.2023, 16:00 Slides idea 
+- [x] 11.12.2023, 16:00 Slides idea 
 - [ ] 08.01.2024, 16:00 Slides intermediate results  
 - [ ] 22.01.2024, 16:00 Final results (slides, code) 
 
@@ -9,12 +9,23 @@ Timetable of delivery tasks is:
 [CVUE official google drive](https://drive.google.com/drive/folders/1UC6sGGWkRpJjqyYOnqByaa_mxeucFmqJ)
 
 ## TODOs:
+- [ ] Waad - Dataloading -> check how it works with Keras https://keras.io/api/data_loading/image/ LazyLoading
+- [ ] David - Training Loop with Keras!
+  - Callback for creating predictions every ~15 epochs
+  - Callback for checkpointing
+- [ ] Max - Models in models.py
 
-- [ ] Raphi - Make AOS integrator work. Produce an Integral image. Ideally our complete focal stack.
+stage 2  
+- [ ] ? - After Testrun in locally
+- [ ] ? - produce several predictions for presentation
+
+
+archive  
+- [x] Raphi - Make AOS integrator work. Produce an Integral image. Ideally our complete focal stack.
 - [x] Max - Make Architecture Work.  -> see code/main.ipynb Notes are in there
-- [ ] Moritz - Update the Slides, when Max and Raphi provide material.
+- [x] Moritz - Update the Slides, when Max and Raphi provide material.
 - [x] Max - Check for changing shape of Residual connections. Is there a paper of some Blog about it ? (Our Encoder Convnet has 7 channels, our focal stack. And our decoder only 1, because the output is a grayscal image. Then we cannot simply reuse the classic residual connection, because it assumes same shape. I guess, we are not the first with this issue, there could be something out there)
-- [ ] Volunteer - Checkout neural network training API ? Maybe we can use keras, or some other Trainer (FastAI, MosaicML Composer). Would be nice maybe because then we probably save time writing the training loop etc. Not so important though, we can just implement classic pytorch Trainign loop.
+- [x] Volunteer - Checkout neural network training API ? Maybe we can use keras, or some other Trainer (FastAI, MosaicML Composer). Would be nice maybe because then we probably save time writing the training loop etc. Not so important though, we can just implement classic pytorch Trainign loop.
 
 ### Open Questions: 
 - is the AOS integrator complete? It looks like we need to adapt it

@@ -9,7 +9,9 @@ Timetable of delivery tasks is:
 [CVUE official google drive](https://drive.google.com/drive/folders/1UC6sGGWkRpJjqyYOnqByaa_mxeucFmqJ)
 
 ## TODOs:
-- [ ] Waad - Dataloading -> check how it works with Keras https://keras.io/api/data_loading/image/ LazyLoading
+- [ ] Waad - Dataloading
+  - check how it works with Keras (https://keras.io/api/data_loading/image/)
+  - LazyLoading
 - [ ] David - Training Loop with Keras!
   - Callback for creating predictions every ~15 epochs
   - Callback for checkpointing

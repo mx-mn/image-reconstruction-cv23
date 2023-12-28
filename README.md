@@ -1,4 +1,17 @@
 # image-reconstruction-cv23
+
+### Environment Setup
+
+1. install conda
+2. create virtual environment with packages installed
+  ```zsh
+  % conda env create --prefix=venv --file=environment.yml 
+  % conda activate ./venv 
+  ```
+
+
+### Project Management
+
 Timetable of delivery tasks is:
 - [x] 20.11.2023, 16:00 Slides literature review 
 - [x] 11.12.2023, 16:00 Slides idea 

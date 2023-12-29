@@ -3,3 +3,4 @@
 /slides/
 /venv/
 venv/
+__pycache__/

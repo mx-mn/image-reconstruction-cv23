@@ -11,13 +11,15 @@ map_label_to_name = [None, 'idle','sitting', 'laying']
 def sort_by_number(path):
         return int(str(path.stem).split('_')[-1])
 
-def paths_to_dataset(paths, focal_stack_subset, crop):
+def paths_to_dataset(paths, focal_stack_subset, crop, skip_no_person=True, skip_no_occlusion=True):
     
-    x, y, labels= [], [], []
+    x, y, pose, num_trees = [], [], [], []
 
     for sample in tqdm(paths, total=len(paths)):
 
-        shape = get_params(sample)
+        shape, trees = get_params(sample)
+        if shape is None and skip_no_person: continue
+        if trees == 0 and skip_no_occlusion: continue
         label = map_name_to_label[shape]
         image = open_gt_image(sample)
 
@@ -34,9 +36,10 @@ def paths_to_dataset(paths, focal_stack_subset, crop):
             x.append(cropped_integral_stack)
             y.append(cropped_gt_image)
 
-        labels.append(label)
+        num_trees.append(trees)
+        pose.append(label)
 
-    return x, y, labels
+    return x, y, pose, num_trees
 
 def folder_to_dataset(
     dir: Path, 
@@ -48,7 +51,7 @@ def folder_to_dataset(
     batch_size=None,
 ):
     
-    x, y, labels= [], [], []
+    x, y, pose, trees = [], [], [], []
 
     dirs = [f for f in dir.iterdir() if f.is_dir()]
     paths = list(sorted(dirs, key=sort_by_number))
@@ -69,15 +72,17 @@ def folder_to_dataset(
     while not done:
         if batch_size is not None and i + batch_size < len(paths):
 
-            x, y, labels = paths_to_dataset(paths[i:i+batch_size], focal_stack_subset, crop)
+            x, y, pose, trees = paths_to_dataset(paths[i:i+batch_size], focal_stack_subset, crop)
             i += batch_size
             
         else:
-            x, y, labels = paths_to_dataset(paths[i:], focal_stack_subset, crop)
+            x, y, pose, trees = paths_to_dataset(paths[i:], focal_stack_subset, crop)
             done=True
 
-        assert len(x) == len(y) == len(labels)
-        yield np.stack(x), np.stack(y), np.array(labels, dtype=np.uint8)
+        assert len(x) == len(y) == len(pose) == len(trees)
+
+        if not x: continue
+        yield np.stack(x), np.stack(y), np.array(pose, dtype=np.uint8), np.array(trees, dtype=np.uint8)
 
 def get_labels(dir):
     shapes = []
@@ -97,10 +102,7 @@ def find_integrals(dir: Path, subset=None):
     else:
         integrals = [f for f in subdir.iterdir() if f.name.split('_')[1].split('.')[0] in subset]
     
-    def sort_by_number(path):
-        return int(str(path.stem).split('_')[-1])
-
-    integrals = sorted(integrals, key=sort_by_number)
+    integrals = sorted(integrals, key=lambda x: int(str(x.stem).split('_')[-1]))
 
     return integrals
 
@@ -169,21 +171,23 @@ def stack_integrals(integrals):
 def get_params(dir: Path):
     params_path = [file for file in dir.iterdir() if 'Parameters' in file.name ][0]
     person_shape = None
-    person_pose = None
-    person=True
+    trees = None
     
     with open(params_path, 'r') as f:
         for line in  f.readlines():
             if 'person shape' in line:
                 person_shape = line.split('=')[1].strip()
-
-            elif 'person pose' in line:
-                person_pose = line.split('=')[1].strip()
             
-            if person_pose is not None and person_shape is not None: break
+            if 'numbers of tree per ha' in line:
+                n_trees = line.split('=')[1].strip()
+                if not n_trees.isdigit():
+                    print(line)
+                else:
+                    trees = int(n_trees)
 
-    if person_pose == 'no person': person = False
-    return person_shape
+            if trees is not None and person_shape is not None: break
+
+    return person_shape, trees
 
 def open_gt_image(dir: Path):
     gt_path = [file for file in dir.iterdir() if 'GT' in file.name ][0]
@@ -197,8 +201,29 @@ def print_labels(labels):
 # Here you can put tests for the functions. 
 # This will only be executed when you run this script directly
 if __name__ == '__main__':
-    print('Running Tests...')
-    for i, name in enumerate(map_label_to_name):
-        if map_name_to_label[name] != i: raise ValueError('The mapping is inconsistent')
 
-    print('Done!')
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Process some parameters.')
+
+    parser.add_argument('--batchsize', type=int, required=True,
+                        help='The batch size for processing')
+    parser.add_argument('--output', type=str, required=True,
+                        help='Output filename')
+    parser.add_argument('--basepath', type=str, required=True,
+                        help='Base path for the data')
+    parser.add_argument('--subset', nargs='+', required=True,
+                        help='List of subset strings')
+
+    # Parse the arguments
+    args = parser.parse_args()
+    print(f"Batch size: {args.batchsize}")
+    print(f"Output folder: {args.output}")
+    print(f"Base path: {args.basepath}")
+    print(f"Subset: {args.subset}")
+     
+    path = Path(args.basepath) / args.output
+    path.mkdir(parents=True, exist_ok=True)
+
+    for i, (x, y, pose, trees) in enumerate(folder_to_dataset(args.basepath, args.subset, crop=True, shuffle=True, batch_size=1)):
+        np.savez(path / f'sample_{i}', x=x, y=y)

@@ -1,34 +1,40 @@
-import numpy as np
-from torch.utils.data import Dataset, DataLoader, TensorDataset
 from pathlib import Path
-import torch
+import math
 
-def load(path: Path, normalize=True):
-    # load the mini dataset
-    loaded = np.load(path)
-    x, y, labels = loaded['x'], loaded['y'], loaded['labels']
-
-    if normalize:
-        y = y / 255
-        x = x / 255
-
-    return x, y, labels
+import keras
+import numpy as np
 
 
-class AOSDataset(Dataset):
-    def __init__(self, files):
-        self.files = files
+class DataGenerator(keras.utils.Sequence):
+    def __init__(self, basedir, batch_size):
+        paths = [f for f in basedir.iterdir() if f.is_file()]
+        paths = list(sorted(paths, key=lambda x : int(str(x.stem).split('_')[-1])))
+        self.files = [f.as_posix() for f in paths]
+        self.batch_size = batch_size
+
+    def load(self, path):
+        loaded = np.load(path)
+        x = loaded['x']/ 255
+        y = loaded['y']/ 255
+        return x, y
 
     def __len__(self):
-        return len(self.image_paths)
+        return math.ceil(len(self.files) / self.batch_size)
 
     def __getitem__(self, idx):
-        path = self.files[idx]
-        loaded = np.load(path)
-        x = torch.from_numpy(loaded['x'])
-        y = torch.from_numpy(loaded['y'])
-        return x, y
+        low = idx * self.batch_size
+        high = min(low + self.batch_size, len(self.files))
+        batch = self.files[low:high]
+        X, Y = [],[]
+        for f in batch:
+            x,y = self.load(f)
+            X.append(x)
+            Y.append(y)
+
+        return np.concatenate(X), np.concatenate(Y)
 
 
 if __name__ == '__main__':
-    pass
+    datagen = DataGenerator((Path('..') / 'data' / 'Part_01' / 'crop_1'), 16)
+    _x, _y = datagen[0]
+    _x.shape, _y.shape

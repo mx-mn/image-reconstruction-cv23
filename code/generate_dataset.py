@@ -225,5 +225,5 @@ if __name__ == '__main__':
     path = Path(args.basepath) / args.output
     path.mkdir(parents=True, exist_ok=True)
 
-    for i, (x, y, pose, trees) in enumerate(folder_to_dataset(args.basepath, args.subset, crop=True, shuffle=True, batch_size=1)):
+    for i, (x, y, pose, trees) in enumerate(folder_to_dataset(args.basepath, args.subset, crop=True, shuffle=True, batch_size=args.batchsize)):
         np.savez(path / f'sample_{i}', x=x, y=y)

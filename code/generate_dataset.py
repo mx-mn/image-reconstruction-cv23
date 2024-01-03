@@ -1,9 +1,6 @@
 from pathlib import Path
-from typing import List
-from tqdm import tqdm
 import cv2
 import numpy as np
-import random
 
 map_name_to_label = {'idle': 1, None: 0, 'sitting': 2, 'laying': 3}
 map_label_to_name = [None, 'idle','sitting', 'laying']
@@ -11,78 +8,29 @@ map_label_to_name = [None, 'idle','sitting', 'laying']
 def sort_by_number(path):
         return int(str(path.stem).split('_')[-1])
 
-def paths_to_dataset(paths, focal_stack_subset, crop, skip_no_person=True, skip_no_occlusion=True):
+def extract_data_from_folders(directory, focal_stack_subset, crop):
+    pose, trees = get_params(directory)
+    no_person = (pose is None)
+
+    image = open_gt_image(directory)
+
+    integral_paths = find_integrals(directory, focal_stack_subset)
+    integral_stack = stack_integrals(integral_paths)
+
+    if not crop:
+        x = integral_stack 
+        y = np.array(image, dtype=np.uint8)
+
+    else:
+        x1, x2, y1, y2, cropped_gt_image = crop_image(image, no_person)
+        x = integral_stack[x1:x2,y1:y2]
+        y = cropped_gt_image
     
-    x, y, pose, num_trees = [], [], [], []
+    pose_label = map_name_to_label[pose]
+    return np.array(x), np.array(y), np.array(pose_label), np.array(trees)
 
-    for sample in tqdm(paths, total=len(paths)):
-
-        shape, trees = get_params(sample)
-        if shape is None and skip_no_person: continue
-        if trees == 0 and skip_no_occlusion: continue
-        label = map_name_to_label[shape]
-        image = open_gt_image(sample)
-
-        integral_paths = find_integrals(sample, focal_stack_subset)
-        integral_stack = stack_integrals(integral_paths)
-
-        if not crop:
-            x.append(integral_stack)
-            y.append(np.array(image, dtype=np.uint8))
-
-        else:
-            x1, x2, y1, y2, cropped_gt_image = crop_image(image, shape)
-            cropped_integral_stack = integral_stack[x1:x2,y1:y2]
-            x.append(cropped_integral_stack)
-            y.append(cropped_gt_image)
-
-        num_trees.append(trees)
-        pose.append(label)
-
-    return x, y, pose, num_trees
-
-def folder_to_dataset(
-    dir: Path, 
-    focal_stack_subset: List[str], 
-    crop=False,  # cropping. for now fixed to 128x128
-    n=None, # if only n images should be taken
-    randomize=False,  # if those n should be random or the first n
-    shuffle=False,
-    batch_size=None,
-):
-    
-    x, y, pose, trees = [], [], [], []
-
-    dirs = [f for f in dir.iterdir() if f.is_dir()]
-    paths = list(sorted(dirs, key=sort_by_number))
-
-    if n is not None:
-        if randomize:
-            indices = np.random.choice(len(paths), size=n, replace=False)
-            paths = list(np.array(paths)[indices])
-        else:
-            paths = paths[:n]
-    
-    if shuffle:
-        random.shuffle(paths)
-
-    done = False
-    i = 0
-
-    while not done:
-        if batch_size is not None and i + batch_size < len(paths):
-
-            x, y, pose, trees = paths_to_dataset(paths[i:i+batch_size], focal_stack_subset, crop)
-            i += batch_size
-            
-        else:
-            x, y, pose, trees = paths_to_dataset(paths[i:], focal_stack_subset, crop)
-            done=True
-
-        assert len(x) == len(y) == len(pose) == len(trees)
-
-        if not x: continue
-        yield np.stack(x), np.stack(y), np.array(pose, dtype=np.uint8), np.array(trees, dtype=np.uint8)
+def store_as_npz(target_path, x, y, pose, trees):
+    np.savez(target_path, x=x, y=y, pose=pose, trees=trees)
 
 def get_labels(dir):
     shapes = []
@@ -146,14 +94,16 @@ def find_box(x, padding_top, padding_bottom, min_x, max_x):
 
     return bottom, top
 
-def crop_image(image, label, padding_top=64, padding_bottom=64, min_x=0, max_x=512):
+def crop_image(image, no_person, padding_top=64, padding_bottom=64, min_x=0, max_x=512):
 
-    if label is None:
+    # random crop
+    if no_person:
         x1 = np.random.randint(min_x, max_x - padding_bottom - padding_top)
         y1 = np.random.randint(min_x, max_x - padding_bottom - padding_top)
         x2 = x1 + padding_top+padding_bottom
         y2 = y1 + padding_top+padding_bottom
 
+    # crop a rectangle around the person
     else:
         x,y = find_coordinates(image)
         x1, x2 = find_box(y, padding_top, padding_bottom, min_x, max_x)
@@ -202,6 +152,9 @@ def print_labels(labels):
 # This will only be executed when you run this script directly
 if __name__ == '__main__':
 
+
+
+    raise ValueError(' update the calling of the conversion, like it is in the notebook.')
     import argparse
     
     parser = argparse.ArgumentParser(description='Process some parameters.')
@@ -224,6 +177,8 @@ if __name__ == '__main__':
      
     path = Path(args.basepath) / args.output
     path.mkdir(parents=True, exist_ok=True)
+
+    # TODO:  change this if needed
 
     for i, (x, y, pose, trees) in enumerate(folder_to_dataset(args.basepath, args.subset, crop=True, shuffle=True, batch_size=args.batchsize)):
         np.savez(path / f'sample_{i}', x=x, y=y)

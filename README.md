@@ -21,6 +21,33 @@ Timetable of delivery tasks is:
 [project introduction slides](https://moodle.jku.at/jku/pluginfile.php/9527377/mod_resource/content/7/Project_Introduction_%28Abbass%29.pdf)  
 [CVUE official google drive](https://drive.google.com/drive/folders/1UC6sGGWkRpJjqyYOnqByaa_mxeucFmqJ)
 
+
+## new todos:
+- [ ] David Dataset - large images validation dataset
+  - split the dataset BEFORE generating the .npz files
+  - generate training set with crop
+  - generate validation set with and without crop
+  - upload to drive
+
+- [ ] Max - dataset generator with num_trees, pose --> send to david
+- [ ] Max - Filter dataset on load 
+
+- [ ] Moritz : Training pipeline ausschmücken
+   - checkpointing callback
+   - track two validation losses ? 
+          2 different validation sets with different size? for plitting and comparing
+
+- [ ] Raphi, Moritz : Test Training durchführen
+  - hyperparameters: larger model(more layers, more features)
+  - learning rate, batch_size 
+
+
+for presentation:
+- sample predictions
+- cropping approach
+- loss plots
+- remove images with weird Ground truth background pattern
+
 ## TODOs:
 - [ ] Waad - Dataloading
   - check how it works with Keras (https://keras.io/api/data_loading/image/)

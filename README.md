@@ -1,5 +1,59 @@
 # image-reconstruction-cv23
 
+
+## Final Todos
+
+
+1. Prepare Presentation
+   - Combined images
+   - loss plots
+   - lr scheduler
+   - time
+   - A100 GPU
+   - Colab
+   - Keras
+
+   Compare Scenarios
+   Look at where it works, where it doesnt
+   Be Fair
+
+2. Prepare Submission
+  - create a test script: it takes png images as input and should output a png image
+    - create a numpy array from the png images (reuse code from generate_dataset.py)
+    - make sure it is normalized
+    - which model we use is hardcoded, not selectable
+    - inside, keras model.predict is called. Can be slow, doesnt matter
+    - unnormalize to 0-255
+    - export .png
+    - 
+  - create a file that *could* be used to generate the datasets. David
+    - input: list of folders ['Part01', 'Part02',...]
+    - output: our Trainsset, our validation set
+   
+  - create a file that can be used to train a model, given OUR dataset.
+    - takes 3 paths: valset_crop_path, trainset_crop_path, model_output_path
+    - other paths can just be assumed.
+    - trains with keras
+    - saves model to  
+
+  - create a requirements.txt or rather, environment.yml
+    - make sure that it really works.
+    - run dataset generation,  with at least on small sample
+    - run training with 1 epoch, super small
+    - run prediction once
+    - if all works: >conda env export and note the versions of the dependencies that **are already** in the environment.yml file. add them there
+
+3. Write a Report
+   - should be easy
+
+
+
+
+
+
+
+
+
 ### Environment Setup
 
 1. install conda

@@ -4,3 +4,7 @@
 /venv/
 venv/
 __pycache__/
+tfvenv/
+predictions/
+test_set_pred/
+models/

@@ -8,43 +8,15 @@ import LFR_utils as utils
 import pyaos
 import glm
 import shutil
+import re
+import glob
+
 
 ##########################################################
 # Define the path to the dataset folder
-dataset_path = r"D:\CV_Project\dataset"
-output_path = r"D:\CV_Project\dataset_integrated"
-
-
-#############################Start the AOS Renderer###############################################################
-w,h,fovDegrees = 512, 512, 50 # resolution and field of view. This should not be changed.
-
-if 'window' not in locals() or window == None:
-                                    
-    window = pyaos.PyGlfwWindow( w, h, 'AOS' )  
-    
-aos = pyaos.PyAOS(w,h,fovDegrees) 
-
-
-set_folder = r'C:\Users\Raphael\Desktop\PrivatRaphael\AI\ComputerVision\AOS_integrator\LFR\python'          # Enter path to your LFR/python directory
-aos.loadDEM( os.path.join(set_folder,'zero_plane.obj'))
-    
-
-# Loop through each folder in the dataset folder
-for root, dirs, files in os.walk(dataset_path):
-    # Loop through each directory in the current folder
-
-    for dir_name in dirs:
-        # Check if the directory name is "thermal_imgs"
-        if dir_name == "thermal_imgs":
-            # Define the path to the current directory
-            dir_path = os.path.join(root, dir_name)
-            dir_output = os.path.join(output_path, os.path.basename(root))
-            for focal_plane in np.arange(0, 3.2, 0.2):
-                AOS_integrator(set_folder, aos, output_dir = dir_output, thermal_imgs_dir = dir_path, focal_plane = focal_plane)
-
-#############################Create Poses for Initial Positions###############################################################
-
-# Below are certain functions required to convert the poses to a certain format to be compatabile with the AOS Renderer.
+dataset_path = r"Path/to/prefiltered_dataset"
+output_path = r"Path/where/to/create/integral_dataset"
+set_folder = r'LFR/Python/directory'          # Enter path to your LFR/python directory
 
 def eul2rotm(theta) :
     s_1 = math.sin(theta[0])
@@ -92,8 +64,6 @@ def pose_to_virtualcamera(vpose ):
     #print(cameraviewarr)
     return cameraviewarr  
 
-
-
 ########################## Below we generate the poses for rendering #####################################
 def AOS_integrator(set_folder, aos, output_dir, thermal_imgs_dir, focal_plane):
     render_fov = 50
@@ -135,8 +105,6 @@ def AOS_integrator(set_folder, aos, output_dir, thermal_imgs_dir, focal_plane):
         
     #############################Read the generated images from the simulator and store in a list ###############################################################
 
-    import re
-
     numbers = re.compile(r'(\d+)')
     def numericalSort(value):
         parts = numbers.split(value)
@@ -144,15 +112,10 @@ def AOS_integrator(set_folder, aos, output_dir, thermal_imgs_dir, focal_plane):
         return parts
 
     imagelist = []
-
-    import glob
-
     for img in sorted(glob.glob(thermal_imgs_dir + '/*.png'),key=numericalSort):      # Enter path to the images directory which should contain 11 images.
         n= cv2.imread(img)
         imagelist.append(n)
 
-        
-        
     aos.clearViews()   # Every time you call the renderer you should use this line to clear the previous views  
     for i in range(len(imagelist)):
             aos.addView(imagelist[i], site_poses[i], "DEM BlobTrack")  # Here we are adding images to the renderer one by one.
@@ -166,5 +129,79 @@ def AOS_integrator(set_folder, aos, output_dir, thermal_imgs_dir, focal_plane):
     filepath = os.path.join(Integral_Path, filename) 
     print(filepath)
     cv2.imwrite(filepath, tmp_RGB)   # Final result. Check the integral result in the integrals folder.
-   
 
+def prepare_raw_dataset():
+    # Loop through each folder in the dataset folder
+    for foldername in os.listdir(dataset_path):
+
+        # Define the path to the current folder
+        folder_path = os.path.join(dataset_path, foldername)
+        
+        # Check if the current path is a directory
+        if not os.path.isdir(folder_path):
+            continue
+
+        # Define the path to the thermal_imgs folder
+        thermal_imgs_path = os.path.join(folder_path, "thermal_imgs")
+        os.makedirs(thermal_imgs_path, exist_ok=True)
+
+        # Loop through each file in the current folder
+        for filename in os.listdir(folder_path):
+            if 'GT' in filename:
+                continue
+            if "thermal_imgs" in filename:
+                continue
+            if 'Parameters' in filename:
+                continue
+
+            # Define the source path of the current file
+            source_path = os.path.join(folder_path, filename)
+            
+            # Define the destination path of the current file
+            destination_path = os.path.join(thermal_imgs_path, filename)
+
+            # Copy the current file to the thermal_imgs folder
+            shutil.move(source_path, destination_path)
+
+def add_parameters_and_gt_to_integral_dataset():
+    src_path = dataset_path
+    dst_path = output_path
+
+    for root, dirs, files in os.walk(src_path):
+        for file in files:
+            if "GT" in file or "Parameters" in file:
+                src_file_path = os.path.join(root, file)
+                dst_file_path = os.path.join(dst_path, os.path.basename(root), file)
+                os.makedirs(os.path.dirname(dst_file_path), exist_ok=True)
+                shutil.copy(src_file_path, dst_file_path)
+
+def main():
+    prepare_raw_dataset()
+
+    #############################Start the AOS Renderer###############################################################
+    w,h,fovDegrees = 512, 512, 50 # resolution and field of view. This should not be changed.
+
+    if 'window' not in locals() or window == None:       
+        window = pyaos.PyGlfwWindow( w, h, 'AOS' )  
+        
+    aos = pyaos.PyAOS(w,h,fovDegrees) 
+    aos.loadDEM( os.path.join(set_folder,'zero_plane.obj'))
+
+    # Loop through each folder in the dataset folder
+    for root, dirs, files in os.walk(dataset_path):
+        # Loop through each directory in the current folder
+        for dir_name in dirs:
+            
+            # Check if the directory name is "thermal_imgs"
+            if dir_name != "thermal_imgs": continue
+
+            # Define the path to the current directory
+            dir_path = os.path.join(root, dir_name)
+            dir_output = os.path.join(output_path, os.path.basename(root))
+            for focal_plane in np.arange(0, 3.2, 0.2):
+                AOS_integrator(set_folder, aos, output_dir = dir_output, thermal_imgs_dir = dir_path, focal_plane = focal_plane)
+
+    add_parameters_and_gt_to_integral_dataset()
+
+if __name__ == '__main__':
+     main()

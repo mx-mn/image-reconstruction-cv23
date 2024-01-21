@@ -22,3 +22,6 @@ The focal planes must be provided in a folder. The folder must contain 6 files, 
 '200.png'
 ```
 Other files are ignored. If some files are duplicated, behaviour is undefined.
+
+
+## Overview

@@ -63,17 +63,31 @@
   % conda activate ./venv 
   ```
 
+# installs
+keras
+tensorflow
+ipykernel
+numpy
+tqdm
+matplotlib
 
 ### Project Management
-
 Timetable of delivery tasks is:
 - [x] 20.11.2023, 16:00 Slides literature review 
 - [x] 11.12.2023, 16:00 Slides idea 
 - [ ] 08.01.2024, 16:00 Slides intermediate results  
-- [ ] 22.01.2024, 16:00 Final results (slides, code) 
+- [ ] 22.01.2024, 16:00 Final results (slides, code)
 
 [project introduction slides](https://moodle.jku.at/jku/pluginfile.php/9527377/mod_resource/content/7/Project_Introduction_%28Abbass%29.pdf)  
 [CVUE official google drive](https://drive.google.com/drive/folders/1UC6sGGWkRpJjqyYOnqByaa_mxeucFmqJ)
+
+## final todos:
+- code is verified to be working.
+- code to reproduce the results.
+- subset of samples for final grading.
+- one test on the real focal stack https://drive.google.com/drive/folders/1GuwAC6ASOsbVevTJQo0bF9n3EfAH7y_K
+- final structure
+
 
 
 ## new todos:

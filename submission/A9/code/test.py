@@ -7,44 +7,17 @@ predicts and saves as png
 import argparse
 from pathlib import Path
 import numpy as np
-import cv2
+from utils import find_integrals, stack_integrals, to_pil
 import keras
 from keras.models import Model
-from PIL import Image
-
-__FOCAL_LENGTHS =  ['00', '40', '80', '120', '160', '200']
-
-def __stack_integrals(integrals):
-    images = [cv2.imread(f.as_posix(), cv2.IMREAD_GRAYSCALE) for f in integrals]
-    return np.stack(images, axis=-1) # -> X,Y,C
-
-def __find_integrals(directory: Path):
-    # find all png images in the folder
-    files = [f for f in directory.iterdir() if (f.is_file() and f.name.endswith('.png'))]
-
-    # match the given names
-    planes = []
-    for file in files:
-        if file.stem in __FOCAL_LENGTHS:
-            planes.append(file)
-
-    # sort them ascending
-    integrals = list(sorted(planes, key=lambda x: int(str(x.stem))))
-
-    return integrals
-
-def __to_pil(img):
-    grayscale_img = ((img - img.min()) * (1/(img.max() - img.min()) * 255)).astype('uint8')
-    image = Image.fromarray(grayscale_img.squeeze())
-    return image
 
 def predict(in_dir: Path, out_dir: Path):
 
     # find the path to the integrals
-    integrals = __find_integrals(in_dir)
+    integrals = find_integrals(in_dir)
 
     # stack the integrals in a numpy array
-    focal_stack: np.ndarray = __stack_integrals(integrals) / 255
+    focal_stack: np.ndarray = stack_integrals(integrals) / 255
 
     if focal_stack.shape[0:2] != (512,512):
         focal_stack = np.resize(focal_stack, (512,512,6))
@@ -58,19 +31,18 @@ def predict(in_dir: Path, out_dir: Path):
     pred = model.predict_on_batch(focal_stack)
 
     # create png image and save to outdir
-    __to_pil(pred.squeeze()).save(out_dir / f'prediction.png')
+    to_pil(pred.squeeze()).save(out_dir / f'prediction.png')
 
 def main():
     
     parser = argparse.ArgumentParser(
-                    prog='Predictor',
-                    description='Predict an all in focus image given focal stack as directory.',
-                    epilog="Focal Stack must contain ['00', '40', '80', '120', '160', '200']")
-
+        prog='Predictor',
+        description='Predict an all in focus image given focal stack as directory.',
+        epilog="Focal Stack must contain ['00', '40', '80', '120', '160', '200']"
+    )
 
     parser.add_argument('focal_stack_directory')
     parser.add_argument('--output_dir', required=False)
-
     args = parser.parse_args()
 
     if args.focal_stack_directory is None:

@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import os
 import math
-from LFR_utils import read_poses_and_images,pose_to_virtualcamera, init_aos, init_window
+from LFR_utils import read_poses_and_images, pose_to_virtualcamera, init_aos, init_window
 import LFR_utils as utils
 import pyaos
 import glm
@@ -11,12 +11,53 @@ import shutil
 import re
 import glob
 
+import os
+import re
+from pathlib import Path
+import shutil
 
 ##########################################################
 # Define the path to the dataset folder
-dataset_path = r"Path/to/prefiltered_dataset"
-output_path = r"Path/where/to/create/integral_dataset"
+root =  Path.cwd()
+raw = root / 'data' / 'raw_mini'
 set_folder = r'LFR/Python/directory'          # Enter path to your LFR/python directory
+
+
+def __get_list_of_complete_samples(directory: Path):
+    # directory that contains several unzipped directories, provided by Oliver Bimber 
+    pattern = r'Part\d+/\d+_\d+'
+
+    # collect all filenames in a list
+    file_list = []
+    for part in directory.iterdir():
+        for file in part.iterdir():
+            file_list.append(file)
+
+    file_groups = dict()
+    for file_name in file_list:
+        match = re.search(pattern, file_name.as_posix())
+
+        if not match:
+            print(file_name, ' <- This file is ignored')
+            continue
+
+        common_part = match.group(0)
+        file_groups.setdefault(common_part, []).append(file_name)
+
+    print(f'{len(file_groups)} samples detected.')
+
+    incomplete, complete = dict(),dict()
+    for common_part, files in file_groups.items():
+        if len(files) > 13:
+            print('unexpected extra files')
+        elif len(files) < 13:
+            incomplete[common_part] = files
+        else:
+            complete[common_part] = files
+
+    print(f'{len(incomplete)} samples are incomplete.')
+    print(f'{len(complete)} samples are complete.')
+    return complete, incomplete
 
 def eul2rotm(theta) :
     s_1 = math.sin(theta[0])
@@ -113,6 +154,7 @@ def AOS_integrator(set_folder, aos, output_dir, thermal_imgs_dir, focal_plane):
 
     imagelist = []
     for img in sorted(glob.glob(thermal_imgs_dir + '/*.png'),key=numericalSort):      # Enter path to the images directory which should contain 11 images.
+        if 'GT' in img: continue
         n= cv2.imread(img)
         imagelist.append(n)
 
@@ -130,53 +172,19 @@ def AOS_integrator(set_folder, aos, output_dir, thermal_imgs_dir, focal_plane):
     print(filepath)
     cv2.imwrite(filepath, tmp_RGB)   # Final result. Check the integral result in the integrals folder.
 
-def prepare_raw_dataset():
-    # Loop through each folder in the dataset folder
-    for foldername in os.listdir(dataset_path):
-
-        # Define the path to the current folder
-        folder_path = os.path.join(dataset_path, foldername)
-        
-        # Check if the current path is a directory
-        if not os.path.isdir(folder_path):
-            continue
-
-        # Define the path to the thermal_imgs folder
-        thermal_imgs_path = os.path.join(folder_path, "thermal_imgs")
-        os.makedirs(thermal_imgs_path, exist_ok=True)
-
-        # Loop through each file in the current folder
-        for filename in os.listdir(folder_path):
-            if 'GT' in filename:
-                continue
-            if "thermal_imgs" in filename:
-                continue
-            if 'Parameters' in filename:
-                continue
-
-            # Define the source path of the current file
-            source_path = os.path.join(folder_path, filename)
-            
-            # Define the destination path of the current file
-            destination_path = os.path.join(thermal_imgs_path, filename)
-
-            # Copy the current file to the thermal_imgs folder
-            shutil.move(source_path, destination_path)
-
-def add_parameters_and_gt_to_integral_dataset():
-    src_path = dataset_path
-    dst_path = output_path
-
-    for root, dirs, files in os.walk(src_path):
-        for file in files:
-            if "GT" in file or "Parameters" in file:
-                src_file_path = os.path.join(root, file)
-                dst_file_path = os.path.join(dst_path, os.path.basename(root), file)
-                os.makedirs(os.path.dirname(dst_file_path), exist_ok=True)
-                shutil.copy(src_file_path, dst_file_path)
-
 def main():
-    prepare_raw_dataset()
+    complete, _ = __get_list_of_complete_samples(raw)
+
+    sample_directories = []
+    for key, files in complete.items():
+        if not Path(files[0]).exists(): continue
+        key.split('/')
+        dest = Path(files[0]).parent / key.split('/')[1]
+        dest.mkdir(exist_ok=True, parents=True)
+        sample_directories.append(dest)
+        for file in files:
+            shutil.copy(file, dest / Path(file).name)
+
 
     #############################Start the AOS Renderer###############################################################
     w,h,fovDegrees = 512, 512, 50 # resolution and field of view. This should not be changed.
@@ -187,21 +195,9 @@ def main():
     aos = pyaos.PyAOS(w,h,fovDegrees) 
     aos.loadDEM( os.path.join(set_folder,'zero_plane.obj'))
 
-    # Loop through each folder in the dataset folder
-    for root, dirs, files in os.walk(dataset_path):
-        # Loop through each directory in the current folder
-        for dir_name in dirs:
-            
-            # Check if the directory name is "thermal_imgs"
-            if dir_name != "thermal_imgs": continue
-
-            # Define the path to the current directory
-            dir_path = os.path.join(root, dir_name)
-            dir_output = os.path.join(output_path, os.path.basename(root))
-            for focal_plane in np.arange(0, 3.2, 0.2):
-                AOS_integrator(set_folder, aos, output_dir = dir_output, thermal_imgs_dir = dir_path, focal_plane = focal_plane)
-
-    add_parameters_and_gt_to_integral_dataset()
+    for directory in sample_directories:
+        for focal_plane in [0.0, 0.4, 0.8, 1.2, 1.6, 2.0]:
+            AOS_integrator(set_folder, aos, output_dir = directory, thermal_imgs_dir = directory, focal_plane = focal_plane)
 
 if __name__ == '__main__':
      main()

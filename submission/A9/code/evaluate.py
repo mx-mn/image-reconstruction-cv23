@@ -6,35 +6,14 @@ predicts and saves as png
 
 import argparse
 from pathlib import Path
-import numpy as np
 import keras
 import math
 from keras.models import Model
-from utils import find_integrals, stack_integrals, fing_ground_truth
-
-def prepare_sample(sample_dir):
-    target = fing_ground_truth(sample_dir)
-    integrals = find_integrals(sample_dir)
-    focal_stack = stack_integrals(integrals)
-    return target, focal_stack
+from utils import prepare_samples
 
 def evaluate(in_dir: Path):
-    if 'sample' in in_dir.name:
-        target, focal_stack = prepare_sample(in_dir)
-        samples, targets = [focal_stack], [target]
-    else:
-        samples, targets = [], []
-        for sample_dir in in_dir.iterdir():
-            if 'sample' not in sample_dir.name: continue
-            target, focal_stack = prepare_sample(sample_dir)
-            targets.append(target)
-            samples.append(focal_stack)
-        
-    x = np.stack(samples)
-    y = np.stack(targets)
-    x = x.astype(np.float32) / 255
-    y = y.astype(np.float32) / 255
-    
+    x, y, paths = prepare_samples(in_dir)
+
     model: Model = keras.saving.load_model(Path(__file__).parent.resolve() / 'weights' / 'model.keras')
     model.compile(loss='mean_squared_error')
 
@@ -51,8 +30,7 @@ def main():
         description=(
             'Evaluate all samples in the directory. '
             'The directory must contain a full focal stack and a ground truth image.'
-            
-            ),
+        )
     )
 
     parser.add_argument('directory')

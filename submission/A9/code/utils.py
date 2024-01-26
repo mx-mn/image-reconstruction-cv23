@@ -6,6 +6,31 @@ from pathlib import Path
 
 __FOCAL_LENGTHS =  ['000', '040', '080', '120', '160', '200']
 
+def prepare_samples(in_dir):
+    if 'sample' in in_dir.name:
+        target, focal_stack = prepare_sample(in_dir)
+        samples, targets, paths = [focal_stack], [target], [in_dir]
+    else:
+        samples, targets, paths = [], [], []
+        for sample_dir in in_dir.iterdir():
+            if 'sample' not in sample_dir.name: continue
+            target, focal_stack = prepare_sample(sample_dir)
+            targets.append(target)
+            samples.append(focal_stack)
+            paths.append(sample_dir)
+
+    x = np.stack(samples)
+    y = np.stack(targets)
+    x = x.astype(np.float32) / 255
+    y = y.astype(np.float32) / 255
+    return x,y, paths
+
+def prepare_sample(sample_dir):
+    target = fing_ground_truth(sample_dir)
+    integrals = find_integrals(sample_dir)
+    focal_stack = stack_integrals(integrals)
+    return target, focal_stack
+
 def fing_ground_truth(directory: Path):
     gt_path = [file for file in directory.iterdir() if 'gt' in file.name][0]
     image = cv2.imread(gt_path.as_posix(), cv2.IMREAD_GRAYSCALE)

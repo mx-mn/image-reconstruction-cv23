@@ -190,9 +190,10 @@ def REDNet(num_layers, num_features, channel_size):
     return model
 
 def main():
-    train_set_path = Path.cwd() / 'data' / 'validation' / 'crop' / 'npz'
-    val_set_path = train_set_path
-    checkpoint_dir = Path.cwd() / 'checkpoints'
+    root =  Path(__file__).parent.resolve() 
+    train_set_path = root / 'demo'
+    val_set_path = root / 'demo'
+    checkpoint_dir = root / 'checkpoints'
 
     validation_data = DataGenerator(
         val_set_path, 

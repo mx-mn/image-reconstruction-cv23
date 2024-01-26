@@ -1,9 +1,3 @@
-'''Test file
-Prepares focal stack from images
-Loads model
-predicts and saves as png
-'''
-
 import argparse
 from pathlib import Path
 from utils import prepare_samples, to_pil

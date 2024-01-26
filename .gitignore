@@ -8,3 +8,4 @@ tfvenv/
 predictions/
 test_set_pred/
 models/
+**/images/

@@ -19,10 +19,14 @@ def prepare_samples(in_dir):
             samples.append(focal_stack)
             paths.append(sample_dir)
 
+    if any(i is None for i in targets):
+        y = None
+    else:
+        y = np.stack(targets)   
+        y = y.astype(np.float32) / 255
+
     x = np.stack(samples)
-    y = np.stack(targets)
     x = x.astype(np.float32) / 255
-    y = y.astype(np.float32) / 255
     return x,y, paths
 
 def prepare_sample(sample_dir):
@@ -32,12 +36,16 @@ def prepare_sample(sample_dir):
     return target, focal_stack
 
 def fing_ground_truth(directory: Path):
-    gt_path = [file for file in directory.iterdir() if 'gt' in file.name][0]
-    image = cv2.imread(gt_path.as_posix(), cv2.IMREAD_GRAYSCALE)
+    gt_path = [file for file in directory.iterdir() if 'gt' in file.name]
+    if len(gt_path) == 0: return None
+
+    image = cv2.imread(gt_path[0].as_posix(), cv2.IMREAD_GRAYSCALE)
     return np.array(image, dtype=np.uint8)
 
 def stack_integrals(integrals):
     images = [cv2.imread(f.as_posix(), cv2.IMREAD_GRAYSCALE) for f in integrals]
+    if images[0].shape != (512,512):
+        images = [np.array(Image.fromarray(img).resize((512,512))) for img in images]
     return np.stack(images, axis=-1) # -> X,Y,C
 
 def find_integrals(directory: Path):

@@ -9,12 +9,17 @@ def main():
     raw_df = pd.read_csv(metrics_path)
     df = raw_df.drop('epoch', axis=1)
     min_val_loss = df[:60]['val_loss'].min()
-    ax = df[:60].plot(title=f'Training and Validation Loss \n best val loss:{min_val_loss:.4f}', marker='.', figsize=(16,9), alpha=0.6, xlabel='Epochs')
+    ax = df[:60].plot(
+        title=f'Training and Validation Loss \n best val loss:{min_val_loss:.4f}', marker='.', 
+        figsize=(6,6), 
+        alpha=0.6, xlabel='Epochs')
     plt.tight_layout()
     plt.savefig(output_path / 'MSE_60_epochs.png')
 
     min_val_loss =  df[60:-1]['val_loss'].min()
-    ax = df[60:-1].plot(title=f'Training and Validation Loss \n best val loss:{min_val_loss:.4f}', marker='.', figsize=(16,9), alpha=0.6, xlabel='Epochs')
+    ax = df[60:-1].plot(
+        title=f'Training and Validation Loss \n best mean absolute error:{min_val_loss:.4f} \n best mean squared error: 0.0043', 
+        marker='.', figsize=(6,6), alpha=0.6, xlabel='Epochs')
     plt.tight_layout()
     plt.savefig(output_path / 'extra-training-with-mean-absolute-error.png')
 
@@ -22,7 +27,7 @@ def main():
     df = df.drop(range(40))
 
     min_val_loss = df['val_loss'].min()
-    ax = df.plot(title=f'Last Epochs plus Validation after extra training \n best val loss:{min_val_loss:.4f}', marker='.', figsize=(16,9), alpha=0.6, xlabel='Epochs')
+    ax = df.plot(title=f'Last Epochs plus Validation after extra training \n best val loss:{min_val_loss:.4f}', marker='.', figsize=(6,6), alpha=0.6, xlabel='Epochs')
     ax.set_yscale('log')
     plt.tight_layout()
     plt.savefig(output_path / 'Last-epochs-plus-extra-training-with-mean-absolute-error.png')

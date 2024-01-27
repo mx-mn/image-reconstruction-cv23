@@ -8,3 +8,5 @@ dependencies:
   - keras
   - opencv
   - pillow
+  - pandas
+  - matplotlib

@@ -22,9 +22,6 @@ def predict(in_dir: Path, out_dir: Path, make_combo=False):
 
     x, y, paths = prepare_samples(in_dir)
 
-    #if focal_stack.shape[0:2] != (512,512):
-    #    focal_stack = np.resize(focal_stack, (512,512,6))
-
     # build the model
     model: Model = keras.saving.load_model(Path(__file__).parent.resolve() / 'weights' / 'model.keras')
 
@@ -34,7 +31,7 @@ def predict(in_dir: Path, out_dir: Path, make_combo=False):
         directory = out_dir / path.name
         directory.mkdir(parents=True, exist_ok=True)
         to_pil(pred[i].squeeze()).save(directory / f'prediction.png')
-        if make_combo:
+        if make_combo and y is not None:
             combo_img = combo_1024_512(pred[i], y[i], x[i])
             combo_img.save(directory / f'combo_gt_000_080_160_pred.png')
 
@@ -67,9 +64,10 @@ def main():
     out_dir.mkdir(exist_ok=True, parents=True)
     
     #scenario = '200_trees_idle'
-    #in_dir = Path.cwd()/'submission'/'A9'/'code'/'test_data'/'test'/'images'/scenario/ 'sample_76'
-    #out_dir = in_dir.parent.parent.parent  / 'predictions' / scenario
-    predict(in_dir, out_dir, args.combine if args.combine is not None else False)
+    #in_dir = Path.cwd()/'submission'/'A9'/'code'/'test_data'/ 'sample_real'
+    #out_dir = in_dir
+    make_combo = args.combine if args.combine is not None else False
+    predict(in_dir, out_dir, make_combo)
 
 if __name__ == '__main__':
     main()

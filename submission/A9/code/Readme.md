@@ -1,5 +1,13 @@
 ## A9 Group Repository
 
+Download the test datasets:
+https://drive.google.com/file/d/10GYP_sZqlu62puwqV8AzgGA_1EoXE0kj/view?usp=drive_link
+
+Download all the predictions on the test dataset:
+https://drive.google.com/file/d/1LtFovxUHovmr2h-lXI97Firbe-ilrifL/view?usp=drive_link
+
+
+
 # environment
 cd into the code directory
   ```zsh
@@ -13,6 +21,7 @@ a demo directory is included. Complete dataset must be downloaded extra.
 create predictions with executing:
 ```zsh
 python test.py test_data/images/demo -o predictions/demo --combine
+python test.py test_data/images/sample_real -o predictions/ --combine
 ``` 
 The `--combine` flag indicates if a combination image should be created. It includes the ground truth, 3 focal planes and the prediction in one image, for easy comparisson.
 
@@ -95,51 +104,10 @@ PSNR : 20.39679 dB
 The folder `other` contains the code used to prepare the dataset and train the model. 
 The model is defined in `train.py`.
 For training we transformed the input images into numpy arrays and stored them as .npz files, which are great for fast loading.
-In order to train the model on the whole dataset, we needed to load the data lazily. Thats why we used a format that does not need any processing during the training phase. A demo dataset with just 2 samples was added.
-
-Also the code for creating the integral images and cleaning the dataset is in here.
-
-# Notes
-`this is intended to be a complete description of what we did.`
-
-We received data containing many thousands of samples. Each sample consists of 11(?) images, a ground truth image and a parameters file, containing metadata.
-First, we sorted out all the samples where not all files are present. This resulted in removing around 2.8% of all samples.
-
-Then we create the integral image with the provided tools for each sample, for a focal stack `[0, -0.4, -0.8, -1.2, -1.6, -2.0]`.
-
-All the samples are randomly split into training set and validation and test set.
-
-The Training set contains 27281 samples. From these 27281, we remove the samples where there is no person for training. This reduces the training set size to 24632. Distribution:
+In order to train the model on the whole dataset, we needed to load the data lazily. Thats why we used a format that does not need any processing during the training phase. 
+A demo dataset with just 2 samples was added. you can just run
 ```
-by pose
-laying          8213           
-idle            8182           
-sitting         8237   
-
-by number of  trees per ha
-0               2552  
-100             14709          
-200             7371           
+python other/training/train.py
 ```
-
-The validation and test data together count `4815` samples.
-A random validation set of `128` images was selected to use during the training process.
-This validation set also contains samples with no person, to accurately represent the data.
-```
-by pose
-no_person       12             
-laying          39             
-idle            31             
-sitting         46             
-
-by number of  trees per ha
-0               12             
-100             81             
-200             35             
-```
-
-The remaining `4687` images are not used for training and can be used to assess final model quality.
-We create a collection of images based on the scenario they depict. for each scenario, 45 images are selected at random. 
-One such scenario is for example 'no_person, 200 trees per ha'.
-All possible combinations of pose and number of trees, of which there are 12, are used to create the test set.
-In total, there are 12*45=540 samples.
+and it will do the training we finally did.
+Code for creating the integral images and cleaning the dataset is also in here.

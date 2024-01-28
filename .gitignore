@@ -9,3 +9,4 @@ predictions/
 test_set_pred/
 models/
 **/test/images/
+/submission_full

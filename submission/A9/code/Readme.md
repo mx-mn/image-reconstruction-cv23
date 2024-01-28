@@ -32,6 +32,7 @@ calculate mean squared error and PSNR of given sample(s)
 python evaluate.py test_data/images/demo
 ``` 
 evaluation metrics of the test sets can be found below:
+Note: a file called 'gt.png' has to be included in each sample directory for this to work, which is obviously necessary to compute PSNR and MSE.
 
 ## directory format
 For both, `test.py` and `evaluate.py`, the input must have the following characteristics.

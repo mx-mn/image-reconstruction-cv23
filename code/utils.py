@@ -12,6 +12,139 @@ import keras
 from keras.layers import Input, Conv2D, Conv2DTranspose, Add, Activation
 from keras.models import Model
 import numpy as np
+import random
+from collections import defaultdict
+from tqdm import tqdm
+
+map_label_to_name = ['no_person', 'idle','sitting', 'laying']
+
+class DataGenerator(keras.utils.Sequence):
+    def __init__(
+        self,
+        basedir: Path,
+        batch_size: int = None,
+        included_poses: list = None,
+        included_trees: list = None,
+        shuffle=False,
+        only_use_n: int = None,
+        random_rotation: bool = False,
+        random_flip: bool = False,
+    ):
+        if not basedir.exists():
+            ValueError('Datafolder does not exist. Add it to your drive and try again. Maybe restart the runtime.')
+
+        self.basedir = basedir
+        self.batch_size = batch_size
+        self.included_poses = [map_label_to_name.index(pose) for pose in included_poses] if included_poses is not None else None
+        self.included_trees  = included_trees
+        self.filenames = self.__filter(shuffle, only_use_n)
+        self.random_flip = random_flip
+        self.random_rotation = random_rotation
+
+    def __filter(self, shuffle, only_use_n):
+
+        files = []
+        self.pose_distribution = defaultdict(int)
+        self.trees_distribution = defaultdict(int)
+        self.pose_distribution_filtered = defaultdict(int)
+        self.trees_distribution_filtered = defaultdict(int)
+
+        unfiltered = list(self.basedir.iterdir())
+
+        if shuffle:
+            random.shuffle(unfiltered)
+
+        total = len(unfiltered)
+        if only_use_n is not None:
+            total = only_use_n
+
+        for path in tqdm(unfiltered, total=total):
+
+            loaded = np.load(path)
+            pose, trees = loaded['pose'], loaded['trees']
+
+            self.pose_distribution[pose.item()] += 1
+            self.trees_distribution[trees.item()] += 1
+
+            fname = path.name
+            if self.included_poses is not None and pose not in self.included_poses:
+                continue
+
+            if self.included_trees is not None and trees not in self.included_trees:
+                continue
+
+            files.append(fname)
+            self.pose_distribution_filtered[pose.item()] += 1
+            self.trees_distribution_filtered[trees.item()] += 1
+
+            if only_use_n is not None and len(files) == only_use_n:
+                break
+
+        return files
+
+    def load(self, path):
+        loaded = np.load(path)
+        x = loaded['x'] / 255
+        y = loaded['y'] / 255
+        return x, y
+    
+    def __len__(self):
+        if self.batch_size is None:
+            return len(self.filenames)
+
+        return math.ceil(len(self.filenames) / self.batch_size)
+
+    def __getitem__(self, idx):
+
+        if self.batch_size is None:
+            batch = self.filenames
+        else:
+            low = idx * self.batch_size
+            high = min(low + self.batch_size, len(self.filenames))
+            batch = self.filenames[low:high]
+
+        X, Y = [],[]
+        for fname in batch:
+            x,y = self.load(self.basedir / fname)
+
+            flip = self.random_flip and bool(random.getrandbits(1))
+
+            x = np.fliplr(x) if flip else x
+            y = np.fliplr(y) if flip else y
+            X.append(x)
+            Y.append(y)
+
+        return np.stack(X), np.stack(Y)
+
+    def print_info(self):
+        print()
+        shape = self.load(self.basedir / self.filenames[0])[0].shape
+        print(f'{len(self.filenames)} samples with shape : {shape}')
+
+        print(f'Pose distribution total')
+        ("{:<15} {:<15}".format('pose', 'number of samples'))
+        for key, value in self.pose_distribution.items():
+            print("{:<15} {:<15}".format(map_label_to_name[key], value))
+        print()
+        print(f'Pose distribution filtered')
+        ("{:<15} {:<15}".format('pose', 'number of samples'))
+        for key, value in self.pose_distribution_filtered.items():
+            print("{:<15} {:<15}".format(map_label_to_name[key], value))
+
+        print()
+        print(f'Trees distribution total')
+        print("{:<15} {:<15}".format('num trees per ha', 'number of samples'))
+
+        for key, value in self.trees_distribution.items():
+            print("{:<15} {:<15}".format(key, value))
+
+        print()
+        print(f'Trees distribution filtered')
+        print("{:<15} {:<15}".format('num trees per ha', 'number of samples'))
+
+        for key, value in self.trees_distribution_filtered.items():
+            print("{:<15} {:<15}".format(key, value))
+
 
 def select_random_samples(*arrs, num=100):
     indices = np.random.choice(arrs[0].shape[0], size=num, replace=False)
@@ -30,41 +163,6 @@ class PredictionCallback(keras.callbacks.Callback):
         if epoch % self.interval == 0:
             preds = self.model.predict(self.x_val).squeeze()
             plot_image_grid(np.concatenate([self.y_val, preds]), preds.shape[0], 2)
-
-class DataGenerator(keras.utils.Sequence):
-    '''
-    This can be used in keras.Model.fit method. It loads .npz files from disk, keeps RAM usage low.
-    Locally sometimes there were errors. couldnt import keras.utils.Sequence, but on colab it works.
-
-    TODO:
-    - make it support multiple directories from where .npz files are accumulated. 
-    '''
-    def __init__(self, basedir, batch_size):
-        paths = [f for f in basedir.iterdir() if f.is_file()]
-        paths = list(sorted(paths, key=lambda x : int(str(x.stem).split('_')[-1])))
-        self.files = [f.as_posix() for f in paths]
-        self.batch_size = batch_size
-
-    def load(self, path):
-        loaded = np.load(path)
-        x = loaded['x']/ 255
-        y = loaded['y']/ 255
-        return x, y
-
-    def __len__(self):
-        return math.ceil(len(self.files) / self.batch_size)
-
-    def __getitem__(self, idx):
-        low = idx * self.batch_size
-        high = min(low + self.batch_size, len(self.files))
-        batch = self.files[low:high]
-        X, Y = [],[]
-        for f in batch:
-            x,y = self.load(f)
-            X.append(x)
-            Y.append(y)
-
-        return np.concatenate(X), np.concatenate(Y)
 
 def plot_history(history):
     plt.plot(history.history['loss'])

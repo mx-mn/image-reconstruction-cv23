@@ -1,6 +1,7 @@
 from pathlib import Path
 import cv2
 import numpy as np
+import tqdm
 
 map_name_to_label = {'idle': 1, None: 0, 'sitting': 2, 'laying': 3}
 map_label_to_name = [None, 'idle','sitting', 'laying']
@@ -151,34 +152,24 @@ def print_labels(labels):
 # Here you can put tests for the functions. 
 # This will only be executed when you run this script directly
 if __name__ == '__main__':
+    base = Path('..') / 'data'
+    source = base / 'Part_01'
+    target = base / 'Part_01_delete'
+    target.mkdir(parents=True, exist_ok=True)
 
+    # only take these focal planes
+    subset=['00', '40', '80', '120', '160', '200']
 
+    # find all subdirectories of the Part
+    dirs = [f for f in source.iterdir() if f.is_dir()]
 
-    raise ValueError(' update the calling of the conversion, like it is in the notebook.')
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Process some parameters.')
+    # sort them alphabetically, just for consistency when using 'the first 10' for example
+    dirs_of_samples = list(sorted(dirs, key=lambda x : int(str(x.stem).split('_')[-1])))
 
-    parser.add_argument('--batchsize', type=int, required=True,
-                        help='The batch size for processing')
-    parser.add_argument('--output', type=str, required=True,
-                        help='Output filename')
-    parser.add_argument('--basepath', type=str, required=True,
-                        help='Base path for the data')
-    parser.add_argument('--subset', nargs='+', required=True,
-                        help='List of subset strings')
+    for i, folder in tqdm(enumerate(dirs_of_samples), total=len(dirs_of_samples)):
 
-    # Parse the arguments
-    args = parser.parse_args()
-    print(f"Batch size: {args.batchsize}")
-    print(f"Output folder: {args.output}")
-    print(f"Base path: {args.basepath}")
-    print(f"Subset: {args.subset}")
-     
-    path = Path(args.basepath) / args.output
-    path.mkdir(parents=True, exist_ok=True)
+        # convert to numpy arrays
+        x, y, pose, trees = extract_data_from_folders(folder, subset, crop=True)
 
-    # TODO:  change this if needed
-
-    for i, (x, y, pose, trees) in enumerate(folder_to_dataset(args.basepath, args.subset, crop=True, shuffle=True, batch_size=args.batchsize)):
-        np.savez(path / f'sample_{i}', x=x, y=y)
+        # store
+        store_as_npz(target / f'sample_{i}', x, y, pose, trees)
